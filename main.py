@@ -37,7 +37,7 @@ ireland = 'https://ie.indeed.com'
 
 def main():
     driver = configure_webdriver()
-    country = india
+    country = canada
     sender_email = os.getenv("SENDER_EMAIL")
     receiver_email = os.getenv("RECEIVER_EMAIL")
     password = os.getenv("PASSWORD")
