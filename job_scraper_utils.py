@@ -67,7 +67,7 @@ def configure_webdriver(proxy=None):
     return driver
 
 
-def search_jobs(country, job_position, job_location, date_posted, proxy_list):
+def search_jobs(country, job_position, job_location, date_posted):
     """Search for jobs using a random proxy."""
     raw_proxy = get_random_proxy(proxy_list)  # Choose a random proxy from the list
     parts = raw_proxy.split(":")
@@ -79,26 +79,42 @@ def search_jobs(country, job_position, job_location, date_posted, proxy_list):
     full_url = f'{country}/jobs?q={"+".join(job_position.split())}&l={job_location}&fromage={date_posted}'
     print(full_url)
     driver.get(full_url)
+
+    print(driver.page_source)
+
+    page_source = driver.page_source
+
     global total_jobs
+
     try:
-        job_count_element = driver.find_element(By.CSS_SELECTOR, '#mosaic-jobResults > u')
-        job_elements = job_count_element.find_elements(By.XPATH, './*')
-
-        for child in job_elements:
-            try:
-                # Find the first <span> descendant of each child
-                span = child.find_element(By.XPATH, './/span')
-                # Get the text of the first <span>
-                print(f"Text inside span: {span.text}")
-            except NoSuchElementException:
-                # Handle the case where no <span> is found inside the child
-                print("No span found in this child.")
-
-        # total_jobs = job_count_element.find_element(By.XPATH, './span').text
-        # print(f"{total_jobs} found")
+        # Example: Checking if there's a CAPTCHA image
+        driver.find_element(By.CSS_SELECTOR, 'img[src*="captcha"]')
+        print('there is a captcha')
     except NoSuchElementException:
-        print("No job count found")
-        total_jobs = "Unknown"
+        print('no captcha found')
+
+
+    print('1')
+
+    # This isn't working. Indeed is showing me a page "This site can't be reached"
+    job_elements_parent = driver.find_element(By.ID, "mosaic-provider-jobcards")
+    print('2')
+    job_elements = job_elements_parent.find_element(By.XPATH, "./*")
+    # print(len(job_elements))
+
+    for child in job_elements:
+        try:
+            # Find the first <span> descendant of each child
+            span = child.find_element(By.XPATH, './/span')
+            # Get the text of the first <span>
+            print(f"Text inside span: {span.text}")
+        except NoSuchElementException:
+            # Handle the case where no <span> is found inside the child
+            print("No span found in this child.")
+
+    # total_jobs = job_count_element.find_element(By.XPATH, './span').text
+    # print(f"{total_jobs} found")
+
 
     driver.save_screenshot('screenshot.png')
     return full_url
@@ -275,6 +291,5 @@ search_jobs(
             'https://ca.indeed.com',
             'developer',
             'remote',
-            20,
-    proxy_list
+            10
 )
